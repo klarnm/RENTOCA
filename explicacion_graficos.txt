@@ -1,0 +1,17 @@
+Explicación de los 4 gráficos de análisis descriptivo
+
+1. Boxenplot: Ingresos (p1_ing) por nivel educativo
+-----------------------------------------------------
+Este gráfico muestra la distribución de los ingresos mensuales según el nivel educativo de las personas. Cada caja representa un nivel educativo y su forma indica cómo se distribuyen los ingresos dentro de ese grupo. Los niveles educativos más altos (maestría, doctorado, titulado) tienden a tener ingresos más altos y mayor dispersión. Los niveles más bajos tienen ingresos más bajos y menos variabilidad. Los puntos fuera de las cajas son outliers (personas con ingresos mucho mayores al promedio de su grupo).
+
+2. Gráfico de barras: Porcentaje de valores nulos por columna principal
+-----------------------------------------------------------------------
+Este gráfico muestra el porcentaje de valores faltantes (nulos) en cada una de las columnas principales del dataset. Permite identificar rápidamente qué variables tienen más datos faltantes y tomar decisiones para el análisis o limpieza. Por ejemplo, si una columna tiene más del 40% de nulos, puede requerir atención especial.
+
+3. Hexbin: Relación entre edad e ingresos mensuales (p1_ing)
+------------------------------------------------------------
+Este gráfico hexbin muestra la relación entre la edad y los ingresos mensuales. Cada hexágono representa un grupo de personas con edades e ingresos similares, y el color indica cuántos registros hay en ese grupo. La mayoría de los datos se concentran en ingresos bajos, sin importar la edad. El gráfico ayuda a visualizar la densidad de los datos y detectar patrones o outliers.
+
+4. Violinplot: Distribución de horas trabajadas por sector
+----------------------------------------------------------
+Este gráfico muestra cómo se distribuyen las horas trabajadas en cada sector cultural. La forma del violín indica la densidad de los datos: las partes más anchas muestran donde hay más personas con ese número de horas trabajadas. La caja interna indica la mediana y los cuartiles. Permite comparar fácilmente la dedicación laboral entre sectores y detectar desigualdades o patrones.

@@ -1,0 +1,93 @@
+Resumen para PPT — Proyecto RENTOCA
+
+Slide 1 — Título
+- RENTOCA: Análisis Estadístico y Predictivo
+- Limpieza y modelado del Registro Nacional de Trabajadores Culturales (Perú)
+
+Slide 2 — Propósito del Proyecto
+- Limpieza y estandarización del dataset original
+- Generación de visualizaciones estadísticamente relevantes
+- Prototipo de predicción de formalidad (registro SUNAT)
+
+Slide 3 — Estructura del repositorio (archivos clave)
+- `main.py` — Aplicación web (FastHTML): rutas `/`, `/limpio`, `/analisis`, `/predicciones`
+- `analisis_descriptivo.py` — Script que genera PNGs estadísticos en `static/`
+- `data/rentoca_limpio.csv` — Dataset limpio (entrada principal)
+- `static/` — Imágenes: boxenplot, heatmap nulos, hexbin, violinplot, gráfico de predicciones
+- `explicacion_graficos.txt` — Documentación de las visualizaciones
+
+Slide 4 — `main.py`: responsabilidades
+- Interfaz UI + CSS (tema oscuro, tarjetas y grid)
+- Gestión de sesión (in-memory) y login demo
+- Rutas:
+  - `/` portada + vista previa del dataset
+  - `/limpio` explicación de pasos de limpieza (12 pasos)
+  - `/analisis` muestra los gráficos
+  - `/predicciones` pipeline ML y tabla de predicciones (muestra limitada)
+
+Slide 5 — Pipeline ML (en `main.py` y `analisis_descriptivo.py`)
+- Objetivo: predecir formalidad (SUNAT) → binario: Formal (1) vs Informal (0)
+- Pasos principales:
+  1. Cargar CSV (`sep=';'`, `encoding='latin1'`, `low_memory=False`)
+  2. Filtrar filas sin target y rellenar otros nulos con 'Desconocido'
+  3. Binarizar `p1_sunat` mediante heurística por texto (buscar 'NO EST', 'PERSONA', 'JURIDICA')
+  4. Convertir features a `str` y aplicar `LabelEncoder` por columna
+  5. `train_test_split(test_size=0.2, random_state=42)`
+  6. Entrenar `DecisionTreeClassifier(max_depth=4)`
+  7. Evaluación básica: `accuracy` en test
+  8. Mostrar predicciones limitadas (primeras 200 filas) para la UI
+
+Slide 6 — Features usadas (ejemplo)
+- `tipo_registro`, `direccion_principal`, `nivel_educat`, `p1_sector`, `p1_perfil`,
+  `p1_ocupacion_f1`, `frec_ingreso`, `p1_horas`, `p1_cat_lab`, `p1_ing`
+- (Se filtran solo las columnas presentes en el CSV final)
+
+Slide 7 — Visualizaciones generadas
+- `static/analisis_boxen_ing_educacion.png` — Boxenplot: ingresos vs nivel educativo
+- `static/analisis_heatmap_nulos.png` — % nulos por columna
+- `static/analisis_pairplot.png` — Hexbin: edad vs ingresos
+- `static/analisis_violin_horas_sector.png` — Violinplot: horas por sector
+- `static/ml_distribucion_predicciones.png` — Pie de predicciones ML (Formal vs Informal)
+
+Slide 8 — Datos y consideraciones de calidad
+- Encoding: `latin1` usado por problemas de acentos/caracteres
+- `p1_sunat` tiene entradas con artefactos/encoding; por eso se usa heurística textual
+- Dataset preprocesado: ~36.975 filas (aprox.) y ~121 columnas (original)
+- Muchos valores faltantes en columnas no centrales; se rellenan con 'Desconocido' para el demo
+
+Slide 9 — Limitaciones y riesgos
+- Modelo demo: Decision Tree simple, no optimizado para producción
+- Heurística de binarización puede introducir errores (encoding, nuevas categorías)
+- Desequilibrio de clases puede sesgar métricas (se reporta accuracy solo como referencia)
+- Sesiones in-memory → no apto para producción
+- Render de la tabla de predicciones limitado a 200 filas para evitar lentitud
+
+Slide 10 — Recomendaciones técnicas (mejoras)
+- Evaluación extendida: matriz de confusión, precision/recall/F1, AUC
+- Balanceo de clases: `class_weight='balanced'`, oversampling/SMOTE o undersampling
+- Convertir pipeline a `sklearn.pipeline` + serializar modelo (joblib) para producción
+- Paginación en UI + endpoint API para predicciones en lotes
+- Persistencia de sesiones y credenciales seguras (DB / OAuth)
+
+Slide 11 — Comandos clave
+- Ejecutar app: `python main.py`
+- Regenerar gráficos: `python analisis_descriptivo.py`
+- Instalar dependencias: `pip install -r requirements.txt` (o `pip install pandas scikit-learn matplotlib seaborn numpy`)
+
+Slide 12 — Credenciales demo (para demo local)
+- admin / admin123
+- user / user123
+- guest / guest
+
+Slide 13 — Notas para la presentación
+- Mostrar primero 2–3 gráficas clave (boxenplot, heatmap, pie ML)
+- Explicar la limpieza y la razón de la binarización de `p1_sunat`
+- Señalar limitaciones del modelo y próximos pasos para robustecerlo
+
+Slide 14 — Contacto y próximos pasos
+- Proponer conversiones: añadir tests automáticos, crear `requirements.txt` con versiones, agregar CI y despliegue.
+- Preguntas abiertas: ¿Quieres que agregue diapositivas con resultados cuantitativos (accuracy, counts) generadas automáticamente?
+
+---
+
+Archivo generado automáticamente: `SUMMARY_FOR_PPT.txt` — listo para copiar/usar en tu presentación.
