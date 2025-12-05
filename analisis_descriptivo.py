@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 📊 SCRIPT DE GENERACIÓN DE GRÁFICOS ESTÁTICOS
+# SCRIPT DE GENERACIÓN DE GRÁFICOS ESTÁTICOS
 # ═══════════════════════════════════════════════════════════════════════════
 # QUÉ HACE:
 # - Lee el dataset limpio (rentoca_limpio.csv)
@@ -22,13 +22,13 @@ from sklearn.preprocessing import LabelEncoder
 # NOTA: Este script se ejecuta UNA SOLA VEZ para pre-generar las imágenes
 #       La web luego solo muestra estas imágenes (no genera en tiempo real)
 
-# 📂 CARGAR DATASET LIMPIO
+# CARGAR DATASET LIMPIO
 csv_path = 'data/rentoca_limpio.csv'
 df = pd.read_csv(csv_path, sep=';', on_bad_lines='skip', encoding='latin1', low_memory=False)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 📊 GRÁFICO 1: HEATMAP DE VALORES NULOS
+# GRÁFICO 1: HEATMAP DE VALORES NULOS
 # ═══════════════════════════════════════════════════════════════════════════
 # QUÉ MUESTRA:
 # - Porcentaje de datos faltantes por cada columna principal
@@ -65,7 +65,7 @@ plt.savefig('static/analisis_heatmap_nulos.png')
 plt.close()
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 📊 GRÁFICO 2: BOXENPLOT - INGRESOS vs EDUCACIÓN
+# GRÁFICO 2: BOXENPLOT - INGRESOS vs EDUCACIÓN
 # ═══════════════════════════════════════════════════════════════════════════
 # QUÉ MUESTRA:
 # - Distribución de INGRESOS para CADA NIVEL EDUCATIVO
@@ -96,7 +96,7 @@ plt.savefig('static/analisis_boxen_ing_educacion.png')
 plt.close()
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 📊 GRÁFICO 3: HEXBIN - EDAD vs INGRESOS (MAPA DE DENSIDAD)
+# GRÁFICO 3: HEXBIN - EDAD vs INGRESOS (MAPA DE DENSIDAD)
 # ═══════════════════════════════════════════════════════════════════════════
 # QUÉ MUESTRA:
 # - Relación entre EDAD (eje X) e INGRESOS (eje Y)
@@ -137,7 +137,7 @@ plt.savefig('static/analisis_pairplot.png')
 plt.close()
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 📊 GRÁFICO 4: VIOLINPLOT - HORAS TRABAJADAS POR SECTOR
+# GRÁFICO 4: VIOLINPLOT - HORAS TRABAJADAS POR SECTOR
 # ═══════════════════════════════════════════════════════════════════════════
 # QUÉ MUESTRA:
 # - Distribución de HORAS TRABAJADAS para CADA SECTOR
@@ -176,7 +176,7 @@ plt.savefig('static/analisis_violin_horas_sector.png')
 plt.close()
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 🤖 GRÁFICO 5: MODELO MACHINE LEARNING - DECISION TREE (FORMALIDAD)
+# GRÁFICO 5: MODELO MACHINE LEARNING - DECISION TREE (FORMALIDAD)
 # ═══════════════════════════════════════════════════════════════════════════
 # QUÉ HACE:
 # - Entrena un DecisionTreeClassifier para predecir FORMALIDAD
@@ -192,7 +192,7 @@ plt.close()
 #
 # NOTA: Este es un modelo DEMO/EDUCATIVO, no es producción
 
-print('🤖 Generando modelo ML - Decision Tree para predicciones de formalidad...')
+print('Generando modelo ML - Decision Tree para predicciones de formalidad...')
 try:
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # PASO 0: DEFINIR TARGET (QUÉ PREDECIR) Y FEATURES (CON QUÉ PREDECIR)
