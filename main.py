@@ -355,7 +355,12 @@ body {
 # - `menu(username)` devuelve la barra de navegación.
 # - Si `username` está presente muestra un enlace de logout con el nombre.
 def menu(username=None):
-    # Renderiza los links principales y, opcionalmente, el logout
+    """
+    🧭 RENDERIZA LA BARRA DE NAVEGACIÓN PRINCIPAL
+    - Muestra 4 links: original, limpio, análisis, predicciones
+    - Si hay username: muestra botón logout (rojo) alineado a la derecha
+    - Se llama desde TODAS las rutas protegidas para mantener consistencia
+    """
     return Div(
         Div(
             A('RETOCA original', href='/', cls='menu-link'),
@@ -369,36 +374,73 @@ def menu(username=None):
     )
 
 def check_session(request):
-    """Verifica si el usuario tiene una sesión activa"""
+    """
+    🔐 VERIFICA SI LA SESIÓN ES VÁLIDA Y NO HA EXPIRADO
+    - Busca 'session_id' en las cookies del navegador
+    - Comprueba que exista en active_sessions (en memoria)
+    - Valida que NO haya expirado (máximo 24 horas)
+    - Retorna username si es válido, None si no → envía a /login
+    NOTA: Usado en TODAS las rutas protegidas como primera línea
+    """
     session_id = request.cookies.get('session_id')
     if session_id and session_id in active_sessions:
         session_data = active_sessions[session_id]
+        # Verifica tiempo de expiraci ón: 86400 seg = 24 horas
         if session_data['expires'] > datetime.now():
             return session_data['username']
     return None
 
 def create_session(username):
-    """Crea una nueva sesión"""
+    """
+    ✅ CREA UNA NUEVA SESIÓN EN MEMORIA PARA EL USUARIO
+    - Genera token aleatorio SEGURO (secrets.token_hex = criptográfico)
+    - Almacena username + fecha de expiraci ón (24 horas) en active_sessions
+    - Se llama en /login cuando las credenciales son correctas
+    - Retorna el session_id para guardarlo en cookie del navegador
+    """
     import secrets
+    # Token único y seguro: 32 caracteres hexadecimales
     session_id = secrets.token_hex(16)
     active_sessions[session_id] = {
         'username': username,
-        'expires': datetime.now() + timedelta(hours=24)
+        'expires': datetime.now() + timedelta(hours=24)  # Válida 24 horas
     }
     return session_id
 
 
 def truncate(val, maxlen=32):
+    """
+    ✂️ LIMITA EL TEXTO PARA NO ROMPER LAS TABLAS
+    - Convierte el valor a string
+    - Si supera maxlen (32 chars por defecto): corta + agrega '...'
+    - Usado en TODAS las tablas para valores largos (direcciones, descripciones)
+    """
     val = str(val)
     return val if len(val) <= maxlen else val[:maxlen] + '...'
 
 
-# Ruta de predicciones con ML
-# - Carga datos, entrena modelo (demo) y muestra una tabla con predicciones.
-# - La lógica está simplificada para mostrar comportamiento; no es producción.
+# ═══════════════════════════════════════════════════════════════════════════
+# 🤖 RUTA /PREDICCIONES - MODELO MACHINE LEARNING
+# ═══════════════════════════════════════════════════════════════════════════
+# Qué hace:
+# 1. Carga el dataset limpio desde CSV
+# 2. Selecciona features (columnas) relevantes para el modelo
+# 3. Entrena un DecisionTreeClassifier para clasificar FORMALIDAD
+#    (¿está el trabajador registrado en SUNAT o no?)
+# 4. Genera predicciones y las muestra en una tabla interactiva
+# 5. Calcula accuracy (precisión) del modelo
+# 
+# IMPORTANTE: Es un modelo DEMO simplificado, no es producción
+# En producción: usar validación cruzada, grid search, métricas más robustas
+
 @rt('/predicciones')
 def predicciones(request):
-    # Verificar sesión
+    """
+    🔮 ENDPOINT PREDICCIONES CON MACHINE LEARNING
+    - Protegido: verifica sesión primero
+    - Si no hay sesión válida: redirige a /login
+    """
+    # Verificar sesión - si falla, envía a login
     username = check_session(request)
     if not username:
         return RedirectResponse(url='/login', status_code=303)
@@ -407,8 +449,11 @@ def predicciones(request):
     from sklearn.tree import DecisionTreeClassifier
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import LabelEncoder
+    
+    # 📂 CARGAR DATASET
     csv_path = 'data/rentoca_limpio.csv'
     try:
+        # Lee el CSV con separador ';' (decimal latino)
         df = pd.read_csv(csv_path, sep=';', on_bad_lines='skip', encoding='latin1', low_memory=False)
     except Exception as e:
         return Div(
@@ -909,22 +954,51 @@ def limpio(request):
         )
     )
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 🔑 RUTA /LOGIN - AUTENTICACIÓN
+# ═══════════════════════════════════════════════════════════════════════════
+# Qué hace:
+# - GET:  Muestra el formulario de login
+# - POST: Valida credenciales contra DEMO_CREDENTIALS
+#         Si es correcto: crea sesión y redirige a /
+#         Si es incorrecto: muestra error y vuelve a mostrar formulario
+#
+# Credenciales DEMO (en memoria, sin BD):
+#   admin / admin123
+#   user / user123
+#   guest / guest
+
 @rt('/login', methods=['GET', 'POST'])
 async def login(request):
-    error_msg = None
+    """
+    🔐 ENDPOINT DE LOGIN
+    - Maneja GET (mostrar formulario) y POST (procesar credenciales)
+    - Valida contra DEMO_CREDENTIALS (diccionario en memoria)
+    """
+    error_msg = None  # Mensaje de error si credenciales son inválidas
     
+    # ▶️ SI ES POST: Procesar credenciales
     if request.method == 'POST':
+        # Obtener datos del formulario
         form_data = await request.form()
-        username = form_data.get('username', '').strip()
+        username = form_data.get('username', '').strip()  # Elimina espacios
         password = form_data.get('password', '').strip()
         
-        # Validar credenciales
+        # ✅ VALIDAR CREDENCIALES
+        # 1. Verifica que el username exista en DEMO_CREDENTIALS
+        # 2. Compara la contraseña (no es hash, es demo)
         if username in DEMO_CREDENTIALS and DEMO_CREDENTIALS[username] == password:
+            # Credenciales correctas: crear sesión
             session_id = create_session(username)
+            
+            # Crear respuesta de redirect (303 = "See Other")
             response = RedirectResponse(url='/', status_code=303)
+            
+            # 🍪 Guardar session_id en cookie segura (httponly = no acceso desde JS)
             response.set_cookie('session_id', session_id, max_age=86400, httponly=True)
             return response
         else:
+            # ❌ Credenciales incorrectas
             error_msg = 'Usuario o contraseña incorrectos'
     
     return Div(
